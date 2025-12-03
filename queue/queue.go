@@ -3,7 +3,7 @@ package queue
 import "errors"
 
 type QueueInterface[T any] interface {
-	Len() int
+	Size() int
 	IsEmpty() bool
 	IsFull() bool
 	Enqueue(elem T) error
@@ -12,10 +12,10 @@ type QueueInterface[T any] interface {
 }
 
 type Queue[T any] struct {
-	Elements []T
-	out      int
-	inp      int
-	cnt      int
+	elements []T
+	outPos   int
+	inpPos   int
+	count    int
 }
 
 func NewQueue[T any](size int) *Queue[T] {
@@ -23,20 +23,24 @@ func NewQueue[T any](size int) *Queue[T] {
 	if size == 0 {
 		size = 8
 	}
-	q.Elements = make([]T, size)
+	q.elements = make([]T, size)
 	return q
 }
 
-func (q *Queue[T]) Len() int {
-	return len(q.Elements)
+func (q *Queue[T]) Size() int {
+	return len(q.elements)
+}
+
+func (q *Queue[T]) Count() int {
+	return q.count
 }
 
 func (q *Queue[T]) IsEmpty() bool {
-	return (q.cnt == 0)
+	return (q.Count() == 0)
 }
 
 func (q *Queue[T]) IsFull() bool {
-	return (q.cnt == q.Len())
+	return (q.Count() == q.Size())
 }
 
 func (q *Queue[T]) Enqueue(elem T) error {
@@ -44,12 +48,12 @@ func (q *Queue[T]) Enqueue(elem T) error {
 		return errors.New("is full")
 	}
 
-	q.Elements[q.inp] = elem
+	q.elements[q.inpPos] = elem
 
-	q.cnt += 1
-	q.inp += 1
-	if q.inp >= len(q.Elements) {
-		q.inp = 0
+	q.count++
+	q.inpPos++
+	if q.inpPos >= q.Size() {
+		q.inpPos = 0
 	}
 
 	return nil
@@ -60,7 +64,7 @@ func (q *Queue[T]) Peek() (elem T, err error) {
 		return elem, errors.New("is empty")
 	}
 
-	return q.Elements[q.out], nil
+	return q.elements[q.outPos], nil
 }
 
 func (q *Queue[T]) Dequeue() (elem T, err error) {
@@ -68,11 +72,11 @@ func (q *Queue[T]) Dequeue() (elem T, err error) {
 		return elem, errors.New("is empty")
 	}
 
-	elem = q.Elements[q.out]
-	q.cnt -= 1
-	q.out += 1
-	if q.out >= len(q.Elements) {
-		q.out = 0
+	elem = q.elements[q.outPos]
+	q.count--
+	q.outPos++
+	if q.outPos >= q.Size() {
+		q.outPos = 0
 	}
 
 	return elem, nil
