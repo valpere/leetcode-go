@@ -63,13 +63,14 @@ func (q *Stack[T]) Pop() (elem T, err error) {
 	}
 
 	elem = q.elements[q.topPos]
+	q.elements = q.elements[:q.topPos]
 	q.topPos--
 
 	return elem, nil
 }
 
 func (q Stack[T]) String() string {
-	return fmt.Sprintf("elements: %v; top: %v", q.elements, q.topPos)
+	return fmt.Sprintf("elements: %v; len: %v; cap: %v; top: %v", q.elements, len(q.elements), cap(q.elements), q.topPos)
 }
 
 func SwapSkacks[T any](ist, ost *Stack[T]) {
